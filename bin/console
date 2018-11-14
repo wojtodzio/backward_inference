@@ -1,6 +1,15 @@
 #!/usr/bin/env ruby
 
+# Remember where's the console file for code reloading
+CONSOLE_FILE = __FILE__.freeze
 DEFAULT_ENV = :development
+
 require_relative '../config/boot'
+
+# Start a new process and replace the current one
+def reload!
+  puts 'Reloading...'
+  exec(CONSOLE_FILE)
+end
 
 pry
