@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+DEFAULT_ENV = :development
+require_relative '../config/boot'
+
+pry
