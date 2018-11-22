@@ -1,5 +1,5 @@
 DEFAULT_ENV = :test
-require_relative '../config/boot'
+require_relative '../config/app'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
