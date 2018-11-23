@@ -1,7 +1,6 @@
-require_relative 'node'
+require_relative 'constant'
 
 class Predicate
-  include Node
   include Dry::Equalizer(:name, :args)
 
   attr_reader :name, :args
@@ -23,11 +22,11 @@ class Predicate
     "#{name}(#{args_inspect})"
   end
 
-  def predicate?
-    true
+  def fact?
+    args.all? { |arg| arg.is_a?(Constant) }
   end
 
-  def fact?
-    args.empty? || args.all?(&:fact?)
+  def arity
+    args.length
   end
 end

@@ -1,9 +1,6 @@
-require_relative 'node'
-
 class Variable
-  include Node
-
   def initialize(original_name)
+    @original_name = original_name
     @name = "#{original_name}_#{quite_unique_random_number}"
   end
 
@@ -18,7 +15,7 @@ class Variable
 
   private
 
-  attr_reader :name
+  attr_reader :name, :original_name
 
   def quite_unique_random_number
     Time.now.to_i % rand(1000)

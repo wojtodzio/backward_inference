@@ -1,2 +1,2 @@
 require_relative '../config/boot'
-require_relative '../src/parser'
+require_relative '../src/solver'
