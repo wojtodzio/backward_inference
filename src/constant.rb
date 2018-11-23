@@ -1,4 +1,6 @@
 class Constant
+  include Dry::Equalizer(:name)
+
   def initialize(name)
     @name = name
   end

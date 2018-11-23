@@ -2,13 +2,13 @@ RSpec.describe Parser do
   it 'can parse variables' do
     parsed = Parser.parse('shop')
 
-    expect(parsed.right.args.first).to be_a(Variable)
+    expect(parsed.right.first).to be_a(Variable)
   end
 
   it 'can parse constants' do
     parsed = Parser.parse('Tesco')
 
-    expect(parsed.right.args.first).to be_a(Constant)
+    expect(parsed.right.first).to be_a(Constant)
   end
 
   it 'considers atomic facts as clauses with empty left side' do
@@ -18,11 +18,11 @@ RSpec.describe Parser do
     expect(parsed.left).to be_nil
     expect(parsed.right).to be_a(ListOfConjuncts)
 
-    like = parsed.right.args.first
+    like = parsed.right.first
 
-    expect(like).to be_a(Predicate)
+    expect(like).to be_a(AtomicForm)
     expect(like).to be_fact
-    expect(like.arity).to eq(2)
+    expect(like.predicate.arity).to eq(2)
 
     john  = like.args.first
     tesco = like.args.last
@@ -31,18 +31,18 @@ RSpec.describe Parser do
     expect(tesco).to be_a(Constant)
   end
 
-  it 'can parse predicates with variables' do
+  it 'can parse atomic forms with variables' do
     parsed = Parser.parse('Available(Tesco, meal)')
 
     expect(parsed).to be_a(Clause)
     expect(parsed.left).to be_nil
     expect(parsed.right).to be_a(ListOfConjuncts)
 
-    available = parsed.right.args.first
+    available = parsed.right.first
 
-    expect(available).to be_a(Predicate)
+    expect(available).to be_a(AtomicForm)
     expect(available).not_to be_fact
-    expect(available.arity).to eq(2)
+    expect(available.predicate.arity).to eq(2)
 
     tesco = available.args.first
     meal  = available.args.last
@@ -56,19 +56,19 @@ RSpec.describe Parser do
     expect(parsed).to be_a(Clause)
     expect(parsed.right).to be_a(ListOfConjuncts)
 
-    like, shop, polish = parsed.right.args
+    like, shop, polish = parsed.right
 
-    expect(like).to be_a(Predicate)
+    expect(like).to be_a(AtomicForm)
     expect(like).not_to be_fact
-    expect(like.arity).to eq(2)
+    expect(like.predicate.arity).to eq(2)
 
-    expect(shop).to be_a(Predicate)
+    expect(shop).to be_a(AtomicForm)
     expect(shop).not_to be_fact
-    expect(shop.arity).to eq(1)
+    expect(shop.predicate.arity).to eq(1)
 
-    expect(polish).to be_a(Predicate)
+    expect(polish).to be_a(AtomicForm)
     expect(polish).not_to be_fact
-    expect(polish.arity).to eq(1)
+    expect(polish.predicate.arity).to eq(1)
 
     expect(shop.args.first).to eq(polish.args.first)
   end
@@ -78,14 +78,14 @@ RSpec.describe Parser do
 
     expect(parsed).to be_a(Clause)
 
-    like = parsed.left.args.first
-    shop = parsed.right.args.first
+    like = parsed.left.first
+    shop = parsed.right.first
 
-    expect(like).to be_a(Predicate)
-    expect(like.arity).to eq(2)
+    expect(like).to be_a(AtomicForm)
+    expect(like.predicate.arity).to eq(2)
 
-    expect(shop).to be_a(Predicate)
-    expect(shop.arity).to eq(1)
+    expect(shop).to be_a(AtomicForm)
+    expect(shop.predicate.arity).to eq(1)
   end
 
   it 'favours implication precedence over AND' do
@@ -97,27 +97,27 @@ RSpec.describe Parser do
 
     expect(like_and_building).to be_a(ListOfConjuncts)
 
-    like     = like_and_building.args.first
-    building = like_and_building.args.last
+    like     = like_and_building.first
+    building = like_and_building.last
 
-    expect(like).to be_a(Predicate)
-    expect(like.arity).to eq(2)
+    expect(like).to be_a(AtomicForm)
+    expect(like.predicate.arity).to eq(2)
 
-    expect(building).to be_a(Predicate)
-    expect(building.arity).to eq(1)
+    expect(building).to be_a(AtomicForm)
+    expect(building.predicate.arity).to eq(1)
 
-    shop = parsed.right.args.first
+    shop = parsed.right.first
 
-    expect(shop).to be_a(Predicate)
-    expect(shop.arity).to eq(1)
+    expect(shop).to be_a(AtomicForm)
+    expect(shop.predicate.arity).to eq(1)
   end
 
   it 'does variables standarization' do
     parsed_1 = Parser.parse('Shop(y)')
     parsed_2 = Parser.parse('Shop(y)')
 
-    shop_1 = parsed_1.right.args.first
-    shop_2 = parsed_2.right.args.first
+    shop_1 = parsed_1.right.first
+    shop_2 = parsed_2.right.first
 
     expect(shop_1.args.first).not_to eq(shop_2.args.first)
   end
@@ -126,27 +126,51 @@ RSpec.describe Parser do
     parsed = Parser.parse('Shop(y) AND Available(y, x) => Like(John, x)')
 
     shop_and_available = parsed.left
-    like               = parsed.right.args.first
+    like               = parsed.right.first
 
-    shop      = shop_and_available.args.first
-    available = shop_and_available.args.last
+    shop      = shop_and_available.first
+    available = shop_and_available.last
 
     expect(shop.args.first).to eq(available.args.first)
     expect(shop.args.first).not_to eq(available.args.last)
     expect(available.args.last).to eq(like.args.last)
   end
 
+  it 'treates same named predicates with the same arity as the same' do
+    available_1 = Parser.parse('Available(x, y)').right.first
+    available_2 = Parser.parse('Available(Tesco, z)').right.first
+
+    expect(available_1).not_to eq(available_2)
+    expect(available_1.predicate).to eq(available_2.predicate)
+  end
+
+  it 'treates same named predicates with different arity as different' do
+    available_1 = Parser.parse('Available(x, y, z)').right.first
+    available_2 = Parser.parse('Available(Tesco, z)').right.first
+
+    expect(available_1).not_to eq(available_2)
+    expect(available_1.predicate).not_to eq(available_2.predicate)
+  end
+
+  it 'treates differently named predicates with the same arity as different' do
+    available = Parser.parse('Available(x, y)').right.first
+    like      = Parser.parse('Like(x, y)').right.first
+
+    expect(available).not_to eq(like)
+    expect(available.predicate).not_to eq(like.predicate)
+  end
+
   it 'does not wrap predicates inside a clause if called for a query' do
     parsed = Parser.parse('Available(x)', query: true)
 
     expect(parsed).to be_a(ListOfConjuncts)
-    expect(parsed.args.count).to eq(1)
+    expect(parsed.count).to eq(1)
   end
 
   it 'does not wrap AND statements inside a clause if called for a query' do
     parsed = Parser.parse('Shop(x) AND Available(x)', query: true)
 
     expect(parsed).to be_a(ListOfConjuncts)
-    expect(parsed.args.count).to eq(2)
+    expect(parsed.count).to eq(2)
   end
 end

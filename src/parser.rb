@@ -1,7 +1,7 @@
 require_relative 'constant'
 require_relative 'variable'
 require_relative 'clause'
-require_relative 'predicate'
+require_relative 'atomic_form'
 require_relative 'list_of_conjuncts'
 
 class Parser
@@ -33,7 +33,7 @@ class Parser
     return build_implication if string.include?('=>')
     return build_and if string.include?('AND')
     return get_variable(string) if starts_with_lowercase_letter?
-    return build_predicate if string.include?('(')
+    return build_atomic_form if string.include?('(')
     return build_constant
   end
 
@@ -70,11 +70,11 @@ class Parser
     string.split('AND').map { |conjunt| Parser.parse(conjunt, parent: self) }
   end
 
-  def build_predicate
+  def build_atomic_form
     predicate_name, args = string.scan(/(\S+)\s*\((.*)\)/).flatten
     args = args.split(',').map { |arg| Parser.parse(arg, parent: self) }
 
-    Predicate.new(predicate_name, args)
+    AtomicForm.new(predicate_name, args)
   end
 
   def normalize_string(string)

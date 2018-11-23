@@ -1,9 +1,6 @@
 class ListOfConjuncts
+  include Enumerable
   include Dry::Equalizer(:args)
-  extend Enumerable
-  extend Forwardable
-
-  delegate each: :args
 
   attr_reader :args
 
@@ -35,4 +32,14 @@ class ListOfConjuncts
     args_inspects = args.map(&:inspect)
     "(#{args_inspects.join(' AND ')})"
   end
+
+  def each(&block)
+    args.each(&block)
+  end
+
+  def last
+    args.last
+  end
+
+  alias_method :to_ary, :to_a
 end

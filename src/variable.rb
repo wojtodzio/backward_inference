@@ -1,4 +1,6 @@
 class Variable
+  include Dry::Equalizer(:name)
+
   def initialize(original_name)
     @original_name = original_name
     @name = "#{original_name}_#{quite_unique_random_number}"
@@ -18,6 +20,6 @@ class Variable
   attr_reader :name, :original_name
 
   def quite_unique_random_number
-    Time.now.to_i % rand(1000)
+    Time.now.to_i % (rand(1000) + 1)
   end
 end
