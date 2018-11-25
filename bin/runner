@@ -1,15 +1,40 @@
 #!/usr/bin/env ruby
 
-# Remember where's the console file for code reloading
-CONSOLE_FILE = __FILE__.freeze
 DEFAULT_ENV = :production
 
 require_relative '../config/app'
 
-query = gets
-clauses = []
-while clause = gets do
-  clauses << clause
-end
+if ARGV.count == 2
+  input = File.read(ARGV[0]).split("\n").map(&:chomp).map(&:strip).reject(&:empty?)
+  queries = File.read(ARGV[1]).split("\n").map(&:chomp).map(&:strip).reject(&:empty?)
 
-puts KnowledgeBase.new(clauses).ask(query)
+  knowledge_base = KnowledgeBase.new(input)
+
+  result = ''
+  newline = "\n"
+  queries.each do |query|
+    result << "Answers for #{query}:"
+    result << newline
+    knowledge_base.ask(query).each do |answer|
+      result << answer.to_s
+      result << newline
+    end
+    result << newline
+  end
+
+  File.write('output.txt', result)
+else
+  puts "Type your query (=> for implication, AND for conjunction):"
+  query = gets
+  puts 'Type clauses for knowledge base separating them by enter'
+  puts 'Type "end" at the end'
+  queries = []
+  while (q = STDIN.gets.chomp).downcase != 'end'
+    queries << q
+  end
+  puts "Answer to #{query}"
+  puts ''
+  KnowledgeBase.new(queries).ask(query).each do |answer|
+    puts answer
+  end
+end
