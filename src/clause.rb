@@ -4,8 +4,8 @@ class Clause
   attr_reader :left, :right
 
   def initialize(left, right)
-    @left  = ListOfConjuncts.from(left)
-    @right = ListOfConjuncts.from(right)
+    @left  = AndStatement.from(left)
+    @right = AndStatement.from(right)
   end
 
   def to_s

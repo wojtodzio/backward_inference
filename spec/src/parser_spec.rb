@@ -16,7 +16,7 @@ RSpec.describe Parser do
 
     expect(parsed).to be_a(Clause)
     expect(parsed.left).to be_nil
-    expect(parsed.right).to be_a(ListOfConjuncts)
+    expect(parsed.right).to be_a(AndStatement)
 
     like = parsed.right.first
 
@@ -36,7 +36,7 @@ RSpec.describe Parser do
 
     expect(parsed).to be_a(Clause)
     expect(parsed.left).to be_nil
-    expect(parsed.right).to be_a(ListOfConjuncts)
+    expect(parsed.right).to be_a(AndStatement)
 
     available = parsed.right.first
 
@@ -56,7 +56,7 @@ RSpec.describe Parser do
 
     expect(parsed).to be_a(Clause)
     expect(parsed.left).to be_nil
-    expect(parsed.right).to be_a(ListOfConjuncts)
+    expect(parsed.right).to be_a(AndStatement)
 
     available = parsed.right.first
 
@@ -77,7 +77,7 @@ RSpec.describe Parser do
   it 'can parse AND sentences' do
     parsed = Parser.parse('Like(John, x) AND Shop(x) AND Polish(x)')
     expect(parsed).to be_a(Clause)
-    expect(parsed.right).to be_a(ListOfConjuncts)
+    expect(parsed.right).to be_a(AndStatement)
 
     like, shop, polish = parsed.right
 
@@ -118,7 +118,7 @@ RSpec.describe Parser do
 
     like_and_building = parsed.left
 
-    expect(like_and_building).to be_a(ListOfConjuncts)
+    expect(like_and_building).to be_a(AndStatement)
 
     like     = like_and_building.first
     building = like_and_building.last
@@ -186,14 +186,14 @@ RSpec.describe Parser do
   it 'does not wrap predicates inside a clause if called for a query' do
     parsed = Parser.parse('Available(x)', query: true)
 
-    expect(parsed).to be_a(ListOfConjuncts)
+    expect(parsed).to be_a(AndStatement)
     expect(parsed.count).to eq(1)
   end
 
   it 'does not wrap AND statements inside a clause if called for a query' do
     parsed = Parser.parse('Shop(x) AND Available(x)', query: true)
 
-    expect(parsed).to be_a(ListOfConjuncts)
+    expect(parsed).to be_a(AndStatement)
     expect(parsed.count).to eq(2)
   end
 end

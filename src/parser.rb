@@ -2,7 +2,7 @@ require_relative 'constant'
 require_relative 'variable'
 require_relative 'clause'
 require_relative 'atomic_form'
-require_relative 'list_of_conjuncts'
+require_relative 'and_statement'
 
 class Parser
   def self.parse(string, parent: nil, query: false)
@@ -11,7 +11,7 @@ class Parser
     if parsed.is_a?(Clause)
       parsed
     elsif query
-      ListOfConjuncts.from(parsed)
+      AndStatement.from(parsed)
     elsif parent.nil?
       Clause.new(nil, parsed)
     else
