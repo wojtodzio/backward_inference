@@ -7,7 +7,7 @@ RSpec.describe KnowledgeBase do
         Sklep(Groszek)
       KB
 
-      goal = Parser.parse('Sklep(x)', query: true)
+      goal = Parser.parse('Sklep(x)', query: true).first
 
       knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
       expect(knowledge_base.fetch_rules_for_goal(goal)).to contain_exactly(
@@ -23,7 +23,7 @@ RSpec.describe KnowledgeBase do
         Common(x) AND Sklep(y) => Available(x, y)
       KB
 
-      goal = Parser.parse('Available(x, Tesco)', query: true)
+      goal = Parser.parse('Available(x, Tesco)', query: true).first
 
       knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
       fetched_rules = knowledge_base.fetch_rules_for_goal(goal)
@@ -37,42 +37,97 @@ RSpec.describe KnowledgeBase do
   end
 
   describe '#ask' do
-    it 'gives answers to the given query based on the given knowledge base' do
-      query = 'Sklep(x) AND Dostepne(BelgijskaCzekolada, x)'
+    it 'gives answers to the given query if there is an atomic fact with the answer' do
+      knowledge_base = KnowledgeBase.new(['Knows(John, Jane)'])
+
+      answers = knowledge_base.ask('Knows(John, x)')
+
+      expect(answers.map(&:to_s)).to contain_exactly('Knows(John, Jane)')
+    end
+
+    it 'gives answers to the given query if there are multiple atomic facts with the answer' do
       knowledge_base_inputs = <<~KB.split("\n")
-        Sklep(Lewiatan)
-        Sklep(Groszek)
-        Sklep(PiotrIPawel)
-        Sklep(Zabka)
-        Sklep(Tesco)
-        Sklep(Lidl)
-        Sklep(Ikea)
-        JestBelgijskie(BelgijskaCzekolada)
-        JestPolskie(Kubus)
-        JestPolskie(Pudliszki)
-        JestBelgijskie(Praliny)
-        JestMeblem(Krzeslo)
-        JestMeblem(Stol)
-        Dostepne(HotDog, Zabka)
-        JestCzekolada(BelgijskaCzekolada)
-        JestCzekolada(Milka)
-        JestCzekolada(Wedel)
-        JestSzwajcarskie(Milka)
-        JestPolskie(Wedel)
-        JestSlodyczem(Toffifee)
-        JestNiemieckie(Toffifee)
-        JestSlodyczem(x) AND JestPolskie(x) => Dostepne(x, Zabka)
-        JestCzekolada(x) AND JestPolskie(x) => Dostepne(x, Tesco)
-        JestSlodyczem(x) AND JestBelgijskie(x) => Dostepne(x, Lidl)
-        JestCzekolada(x) => JestSlodyczem(x)
-        JestCzekolada(x) => Dostepne(x, Lewiatan)
-        JestMeblem(x) AND JestSzweckie(x) => Dostepne(x, Ikea)
+        Knows(John, Juliet)
+        Knows(Wojtek, Michal)
+        Knows(John, Jane)
+        Knows(Cezar, Kleopatra)
       KB
-
       knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
-      answer = knowledge_base.ask(query)
 
-      expect(answer.map(&:to_s)).to contain_exactly('Lidl', 'Lewiatan')
+      answers = knowledge_base.ask('Knows(John, x)')
+
+      expect(answers.map(&:to_s)).to contain_exactly('Knows(John, Juliet)', 'Knows(John, Jane)')
+    end
+
+    it 'gives no answers if there are no valid substitutions' do
+      knowledge_base_inputs = <<~KB.split("\n")
+        Knows(John, Juliet)
+        Knows(Wojtek, Michal)
+        Knows(John, Jane)
+        Knows(Cezar, Kleopatra)
+      KB
+      knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
+
+      answers = knowledge_base.ask('Knows(Marcel, x)')
+
+      expect(answers.map(&:to_s)).to be_empty
+    end
+
+    it 'gives answers to the given query if it was given in the AND clause' do
+      knowledge_base_inputs = <<~KB.split("\n")
+        Knows(John, Juliet) AND Knows(Wojtek, Michal) AND Knows(John, Jane) AND Knows(Cezar, Kleopatra)
+      KB
+      knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
+
+      answers = knowledge_base.ask('Knows(John, x)')
+
+      expect(answers.map(&:to_s)).to contain_exactly('Knows(John, Juliet)', 'Knows(John, Jane)')
+    end
+
+    it 'gives answers to the given query if it is implied' do
+      knowledge_base_inputs = <<~KB.split("\n")
+        IsNice(PW)
+        IsNice(x) => InPoland(x)
+        IsNice(Warsaw)
+      KB
+      knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
+
+      answers = knowledge_base.ask('IsNice(x)')
+
+      expect(answers.map(&:to_s)).to contain_exactly('IsNice(PW)', 'IsNice(Warsaw)')
+    end
+
+    it "gives answers to  query if it is implied multiple times and there're facts with answer" do
+      knowledge_base_inputs = <<~KB.split("\n")
+        InCity(Warsaw, PW)
+        InCity(x, PW) => InPoland(x)
+        InCity(x, PalacKultury) => IsCapital(x)
+        InCity(Warsaw, PalacKultury)
+        InPoland(x) AND IsCapital(x) => HaveAirport(x)
+        HaveAirport(Katowice)
+        InPoland(Katowice)
+        InPoland(Krakow) AND HaveAirport(Krakow)
+      KB
+      knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
+
+      answers = knowledge_base.ask('HaveAirport(x) AND InPoland(x)')
+
+      expect(answers.map(&:to_s)).to contain_exactly('HaveAirport(Warsaw) AND InPoland(Warsaw)',
+                                                     'HaveAirport(Katowice) AND InPoland(Katowice)',
+                                                     'HaveAirport(Krakow) AND InPoland(Krakow)')
+    end
+
+    it 'avoids loops' do
+      knowledge_base_inputs = <<~KB.split("\n")
+        Equal(x, y) => Equal(y, x)
+        Equal(Warsaw, PolandCapital)
+        Equal(x, Warsaw) => InPoland(x)
+      KB
+      knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
+
+      answers = knowledge_base.ask('InPoland(x)')
+
+      expect(answers.map(&:to_s)).to contain_exactly('InPoland(PolandCapital)')
     end
   end
 end

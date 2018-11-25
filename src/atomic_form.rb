@@ -23,4 +23,36 @@ class AtomicForm
   def fact?
     args.all? { |arg| arg.is_a?(Constant) }
   end
+
+  def uses_variable?(var)
+    args.any? do |arg|
+      case arg
+      when var.class
+        arg == var
+      when AtomicForm
+        arg.uses_variable?(var)
+      end
+    end
+  end
+
+  def dup
+    AtomicForm.new(predicate.name, args.map(&:dup))
+  end
+
+  def substitute_args(mapping)
+    dup.substitute_args!(mapping)
+  end
+
+  def substitute_args!(mapping)
+    args.map! do |arg|
+      if arg.is_a?(AtomicForm)
+        arg.substitute_args!(mapping)
+      elsif mapping.key?(arg)
+        mapping[arg]
+      else
+        arg
+      end
+    end
+    self
+  end
 end

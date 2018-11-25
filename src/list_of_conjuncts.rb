@@ -24,21 +24,27 @@ class ListOfConjuncts
   end
 
   def to_s
-    args_strings = args.map(&:to_s)
-    "(#{args_strings.join(' AND ')})"
+    args.map(&:to_s).join(' AND ')
   end
 
   def inspect
-    args_inspects = args.map(&:inspect)
-    "(#{args_inspects.join(' AND ')})"
+    args.map(&:inspect).join(' AND ')
   end
 
   def each(&block)
     args.each(&block)
   end
 
+  def map(&block)
+    ListOfConjuncts.new(super)
+  end
+
   def last
     args.last
+  end
+
+  def dup
+    ListOfConjuncts.new(args.map(&:dup))
   end
 
   alias_method :to_ary, :to_a

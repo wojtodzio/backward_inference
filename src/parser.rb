@@ -30,6 +30,7 @@ class Parser
   end
 
   def parse
+    return if string.empty?
     return build_implication if string.include?('=>')
     return build_and if string.include?('AND')
     return get_variable(string) if starts_with_lowercase_letter?

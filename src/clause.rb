@@ -15,4 +15,10 @@ class Clause
   def inspect
     "#{left.inspect} => #{right.inspect}"
   end
+
+  def split_right
+    right.map do |compound|
+      Clause.new(left, compound)
+    end
+  end
 end
