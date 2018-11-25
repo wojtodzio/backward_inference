@@ -2,14 +2,14 @@
 
 # Remember where's the console file for code reloading
 CONSOLE_FILE = __FILE__.freeze
-DEFAULT_ENV = :development
+DEFAULT_ENV = :production
 
 require_relative '../config/app'
 
-# Start a new process and replace the current one
-def reload!
-  puts 'Reloading...'
-  exec(CONSOLE_FILE)
+query = gets
+clauses = []
+while clause = gets do
+  clauses << clause
 end
 
-pry
+puts KnowledgeBase.new(clauses).ask(query)
