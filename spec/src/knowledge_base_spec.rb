@@ -1,7 +1,7 @@
 RSpec.describe KnowledgeBase do
   describe '#fetch_rules_for_goal' do
     it 'can find atomic facts leading to the given goal' do
-      knowledge_base_inputs = <<~KB.split("\n")
+      knowledge_base_inputs = <<-KB.split("\n")
         Shop(Lewiatan)
         Polish(Groszek)
         Shop(Groszek)
@@ -17,7 +17,7 @@ RSpec.describe KnowledgeBase do
     end
 
     it 'can find clauses leading to the given goal' do
-      knowledge_base_inputs = <<~KB.split("\n")
+      knowledge_base_inputs = <<-KB.split("\n")
         InPoland(x) AND Shop(x) => Available(Pudliszki, x)
         Light(x) AND Sweet(x) => Like(x)
         Common(x) AND Shop(y) => Available(x, y)
@@ -46,7 +46,7 @@ RSpec.describe KnowledgeBase do
     end
 
     it 'gives answers to the given query if there are multiple atomic facts with the answer' do
-      knowledge_base_inputs = <<~KB.split("\n")
+      knowledge_base_inputs = <<-KB.split("\n")
         Knows(John, Juliet)
         Knows(Wojtek, Michal)
         Knows(John, Jane)
@@ -60,7 +60,7 @@ RSpec.describe KnowledgeBase do
     end
 
     it 'gives no answers if there are no valid substitutions' do
-      knowledge_base_inputs = <<~KB.split("\n")
+      knowledge_base_inputs = <<-KB.split("\n")
         Knows(John, Juliet)
         Knows(Wojtek, Michal)
         Knows(John, Jane)
@@ -74,7 +74,7 @@ RSpec.describe KnowledgeBase do
     end
 
     it 'gives answers to the given query if it was given in the AND clause' do
-      knowledge_base_inputs = <<~KB.split("\n")
+      knowledge_base_inputs = <<-KB.split("\n")
         Knows(John, Juliet) AND Knows(Wojtek, Michal) AND Knows(John, Jane) AND Knows(Cezar, Kleopatra)
       KB
       knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
@@ -85,7 +85,7 @@ RSpec.describe KnowledgeBase do
     end
 
     it 'gives answers to the given query if it is implied' do
-      knowledge_base_inputs = <<~KB.split("\n")
+      knowledge_base_inputs = <<-KB.split("\n")
         IsNice(PW)
         IsNice(x) => InPoland(x)
         IsNice(Warsaw)
@@ -98,7 +98,7 @@ RSpec.describe KnowledgeBase do
     end
 
     it "gives answers to a query if it is implied multiple times and there're facts with answer" do
-      knowledge_base_inputs = <<~KB.split("\n")
+      knowledge_base_inputs = <<-KB.split("\n")
         InCity(Warsaw, PW)
         InCity(x, PW) => InPoland(x)
         InCity(x, PalacKultury) => IsCapital(x)
@@ -118,7 +118,7 @@ RSpec.describe KnowledgeBase do
     end
 
     it 'avoids loops' do
-      knowledge_base_inputs = <<~KB.split("\n")
+      knowledge_base_inputs = <<-KB.split("\n")
         Equal(x, y) => Equal(y, x)
         Equal(Warsaw, PolandCapital)
         Equal(x, Warsaw) => InPoland(x)
@@ -131,7 +131,7 @@ RSpec.describe KnowledgeBase do
     end
 
     it 'can use nested predicates' do
-      knowledge_base_inputs = <<~KB.split("\n")
+      knowledge_base_inputs = <<-KB.split("\n")
         Knows(x, Mom(x))
         Knows(x, Dad(x))
       KB
