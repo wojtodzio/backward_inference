@@ -19,7 +19,7 @@ class KnowledgeBase
 
     substitutions = BackwardChainingSolver.solve_query(self, query)
     substitutions.map do |substitution|
-      query.map { |compound| substitution.apply(compound) }
+      query.map { |atomic_form| substitution.apply(atomic_form) }
     end
   end
 
@@ -27,7 +27,7 @@ class KnowledgeBase
     goal_predicate = goal.predicate
 
     clauses.select do |clause|
-      clause.right.any? { |compound| compound.predicate == goal_predicate }
+      clause.right.any? { |atomic_form| atomic_form.predicate == goal_predicate }
     end
   end
 

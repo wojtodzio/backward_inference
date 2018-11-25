@@ -31,7 +31,7 @@ RSpec.describe Parser do
     expect(tesco).to be_a(Constant)
   end
 
-  it 'can parse atomic forms with variables' do
+  it 'can parse atomic forms with variable arguments' do
     parsed = Parser.parse('Available(Tesco, meal)')
 
     expect(parsed).to be_a(Clause)
@@ -49,6 +49,29 @@ RSpec.describe Parser do
 
     expect(tesco).to be_a(Constant)
     expect(meal).to be_a(Variable)
+  end
+
+  it 'can parse atomic forms with atomic form arguments' do
+    parsed = Parser.parse('Available(x, Shop(x), Tesco)')
+
+    expect(parsed).to be_a(Clause)
+    expect(parsed.left).to be_nil
+    expect(parsed.right).to be_a(ListOfConjuncts)
+
+    available = parsed.right.first
+
+    expect(available).to be_a(AtomicForm)
+    expect(available.predicate.arity).to eq(3)
+
+    x, shop, tesco = available.args
+
+    expect(x).to be_a(Variable)
+    expect(tesco).to be_a(Constant)
+
+    expect(shop).to be_a(AtomicForm)
+    expect(shop.predicate.arity).to eq(1)
+    expect(shop.args.first).to be_a(Variable)
+    expect(shop.args.first).to eq(x)
   end
 
   it 'can parse AND sentences' do

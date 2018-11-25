@@ -17,8 +17,8 @@ class Clause
   end
 
   def split_right
-    right.map do |compound|
-      Clause.new(left, compound)
+    right.map do |atomic_form|
+      Clause.new(left, atomic_form)
     end
   end
 end

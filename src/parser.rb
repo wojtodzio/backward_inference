@@ -72,8 +72,16 @@ class Parser
   end
 
   def build_atomic_form
-    predicate_name, args = string.scan(/(\S+)\s*\((.*)\)/).flatten
-    args = args.split(',').map { |arg| Parser.parse(arg, parent: self) }
+    predicate_name, args = string.scan(/([^\(]+)\s*\((.*)\)/).flatten
+    args = args.split(',').each_with_object([]).each_with_object([]) do |(arg, not_finished), splitted|
+      arg = "#{not_finished.pop},#{arg}" if not_finished.any?
+
+      if arg.count('(') > arg.count(')')
+        not_finished << arg
+      else
+        splitted << arg
+      end
+    end.map { |arg| Parser.parse(arg, parent: self) }
 
     AtomicForm.new(predicate_name, args)
   end

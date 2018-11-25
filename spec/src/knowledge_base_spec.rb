@@ -97,7 +97,7 @@ RSpec.describe KnowledgeBase do
       expect(answers.map(&:to_s)).to contain_exactly('IsNice(PW)', 'IsNice(Warsaw)')
     end
 
-    it "gives answers to  query if it is implied multiple times and there're facts with answer" do
+    it "gives answers to a query if it is implied multiple times and there're facts with answer" do
       knowledge_base_inputs = <<~KB.split("\n")
         InCity(Warsaw, PW)
         InCity(x, PW) => InPoland(x)
@@ -128,6 +128,21 @@ RSpec.describe KnowledgeBase do
       answers = knowledge_base.ask('InPoland(x)')
 
       expect(answers.map(&:to_s)).to contain_exactly('InPoland(PolandCapital)')
+    end
+
+    it 'can use nested predicates' do
+      knowledge_base_inputs = <<~KB.split("\n")
+        Knows(x, Mom(x))
+        Knows(x, Dad(x))
+      KB
+      knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
+
+      answers = knowledge_base.ask('Knows(John, y)')
+
+      expect(answers.map(&:to_s)).to contain_exactly(
+        'Knows(John, Mom(John))',
+        'Knows(John, Dad(John))'
+      )
     end
   end
 end

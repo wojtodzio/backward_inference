@@ -12,8 +12,8 @@ class Substitutions
     return self if failed?
     return self if x == y
 
-    return unify_var(x, y) if x.is_a?(Variable)
-    return unify_var(y, x) if y.is_a?(Variable)
+    return unify_variable(x, y) if x.is_a?(Variable)
+    return unify_variable(y, x) if y.is_a?(Variable)
 
     x_and_y_are_atomic_forms = x.is_a?(AtomicForm) && y.is_a?(AtomicForm)
     return unify!(x.predicate, y.predicate).unify!(x.args, y.args) if x_and_y_are_atomic_forms
@@ -57,11 +57,14 @@ class Substitutions
     self
   end
 
-  def unify_var(var, x)
-    return unify(mapping[var], x) if mapping.key?(var)
-    return unify(var, mapping[x]) if mapping.key?(x)
-    return fail! if x.is_a?(AtomicForm) && x.uses_variable?(var)
+  def unify_variable(variable, x)
+    return unify(mapping[variable], x) if mapping.key?(variable)
+    return unify(variable, mapping[x]) if mapping.key?(x)
+    if x.is_a?(AtomicForm)
+      return fail! if x.uses_variable?(variable)
+      x = apply(x)
+    end
 
-    add(var => x)
+    add(variable => x)
   end
 end

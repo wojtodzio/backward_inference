@@ -27,10 +27,10 @@ class AtomicForm
   def uses_variable?(var)
     args.any? do |arg|
       case arg
-      when var.class
-        arg == var
       when AtomicForm
         arg.uses_variable?(var)
+      when var.class
+        arg == var
       end
     end
   end
