@@ -1,8 +1,5 @@
 class AndStatement < Array
   include Enumerable
-  include Dry::Equalizer(:args)
-
-  attr_reader :args
 
   def self.from(args)
     new(args).flatten if args

@@ -1,13 +1,18 @@
+require 'securerandom'
+
 class Variable
-  include Dry::Equalizer(:name)
+  include Dry::Equalizer(:display_name, :identity_string)
 
   def initialize(original_name)
     @original_name = original_name
-    @name = "#{original_name}_#{quite_unique_random_number}"
+
+    random_number_for_display ||= SecureRandom.random_number(1000)
+    @display_name = "#{original_name}_#{random_number_for_display}"
+    @identity_string = SecureRandom.uuid # Use random string with a very very low chance of clashing
   end
 
   def to_s
-    name
+    display_name
   end
   alias_method :inspect, :to_s
 
@@ -17,9 +22,5 @@ class Variable
 
   private
 
-  attr_reader :name, :original_name
-
-  def quite_unique_random_number
-    Time.now.to_i % (rand(1000) + 1)
-  end
+  attr_reader :original_name, :display_name, :identity_string
 end

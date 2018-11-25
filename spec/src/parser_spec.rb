@@ -21,7 +21,6 @@ RSpec.describe Parser do
     like = parsed.right.first
 
     expect(like).to be_a(AtomicForm)
-    expect(like).to be_fact
     expect(like.predicate.arity).to eq(2)
 
     john  = like.args.first
@@ -41,7 +40,6 @@ RSpec.describe Parser do
     available = parsed.right.first
 
     expect(available).to be_a(AtomicForm)
-    expect(available).not_to be_fact
     expect(available.predicate.arity).to eq(2)
 
     tesco = available.args.first
@@ -82,15 +80,12 @@ RSpec.describe Parser do
     like, shop, polish = parsed.right
 
     expect(like).to be_a(AtomicForm)
-    expect(like).not_to be_fact
     expect(like.predicate.arity).to eq(2)
 
     expect(shop).to be_a(AtomicForm)
-    expect(shop).not_to be_fact
     expect(shop.predicate.arity).to eq(1)
 
     expect(polish).to be_a(AtomicForm)
-    expect(polish).not_to be_fact
     expect(polish.predicate.arity).to eq(1)
 
     expect(shop.args.first).to eq(polish.args.first)

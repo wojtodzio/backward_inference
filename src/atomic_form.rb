@@ -1,4 +1,5 @@
 require_relative 'predicate'
+require_relative 'constant'
 
 class AtomicForm
   include Dry::Equalizer(:predicate, :args)
@@ -18,10 +19,6 @@ class AtomicForm
   def inspect
     args_inspect = args.map(&:inspect).join(', ')
     "#{predicate.inspect}(#{args_inspect})"
-  end
-
-  def fact?
-    args.all? { |arg| arg.is_a?(Constant) }
   end
 
   def uses_variable?(var)

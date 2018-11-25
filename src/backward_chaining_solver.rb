@@ -2,7 +2,7 @@ require_relative 'substitutions'
 
 class BackwardChainingSolver
   def self.solve_query(knowledge_base, query)
-    new(knowledge_base: knowledge_base).solve_and(query).to_a
+    new(knowledge_base: knowledge_base).solve_and(query)
   end
 
   def initialize(substitutions = Substitutions.new, parent: nil, knowledge_base: nil)
@@ -17,30 +17,26 @@ class BackwardChainingSolver
   end
 
   def solve_or(goal)
-    return [].to_enum if visited?(goal)
+    return [] if visited?(goal)
     visit!(goal)
 
-    Enumerator.new do |results|
-      knowledge_base.fetch_rules_for_goal(goal).each do |rule|
-        unified_substitutions = substitutions.unify(rule.right, goal)
-        solver(unified_substitutions).solve_and(rule.left).each do |result|
-          results << result
-        end
+    knowledge_base.fetch_rules_for_goal(goal).each_with_object([]) do |rule, results|
+      unified_substitutions = substitutions.unify(rule.right, goal)
+      solver(unified_substitutions).solve_and(rule.left).each do |result|
+        results << result
       end
     end
   end
 
   def solve_and(goals)
-    return [].to_enum if substitutions.failed?
-    return [substitutions].to_enum if goals.nil? || goals.none?
+    return [] if substitutions.failed?
+    return [substitutions] if goals.nil? || goals.none?
 
-    Enumerator.new do |results|
-      current_goal, *rest_of_goals = goals
-      substituted_goal = substitutions.apply(current_goal)
-      solver(substitutions).solve_or(substituted_goal).each do |current_goal_substitution|
-        solver(current_goal_substitution).solve_and(rest_of_goals).each do |all_goals_substitution|
-          results << all_goals_substitution
-        end
+    current_goal, *rest_of_goals = goals
+    substituted_goal = substitutions.apply(current_goal)
+    solver(substitutions).solve_or(substituted_goal).each_with_object([]) do |current_goal_substitution, results|
+      solver(current_goal_substitution).solve_and(rest_of_goals).each do |all_goals_substitution|
+        results << all_goals_substitution
       end
     end
   end

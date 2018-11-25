@@ -20,7 +20,7 @@ class KnowledgeBase
     substitutions = BackwardChainingSolver.solve_query(self, query)
     substitutions.map do |substitution|
       query.map { |atomic_form| substitution.apply(atomic_form) }
-    end
+    end.uniq
   end
 
   def fetch_rules_for_goal(goal)

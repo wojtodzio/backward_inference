@@ -2,25 +2,25 @@ RSpec.describe KnowledgeBase do
   describe '#fetch_rules_for_goal' do
     it 'can find atomic facts leading to the given goal' do
       knowledge_base_inputs = <<~KB.split("\n")
-        Sklep(Lewiatan)
-        Polski(Groszek)
-        Sklep(Groszek)
+        Shop(Lewiatan)
+        Polish(Groszek)
+        Shop(Groszek)
       KB
 
-      goal = Parser.parse('Sklep(x)', query: true).first
+      goal = Parser.parse('Shop(x)', query: true).first
 
       knowledge_base = KnowledgeBase.new(knowledge_base_inputs)
       expect(knowledge_base.fetch_rules_for_goal(goal)).to contain_exactly(
-        Parser.parse('Sklep(Lewiatan)'),
-        Parser.parse('Sklep(Groszek)')
+        Parser.parse('Shop(Lewiatan)'),
+        Parser.parse('Shop(Groszek)')
       )
     end
 
     it 'can find clauses leading to the given goal' do
       knowledge_base_inputs = <<~KB.split("\n")
-        InPoland(x) AND Sklep(x) => Available(Pudliszki, x)
+        InPoland(x) AND Shop(x) => Available(Pudliszki, x)
         Light(x) AND Sweet(x) => Like(x)
-        Common(x) AND Sklep(y) => Available(x, y)
+        Common(x) AND Shop(y) => Available(x, y)
       KB
 
       goal = Parser.parse('Available(x, Tesco)', query: true).first
@@ -29,10 +29,10 @@ RSpec.describe KnowledgeBase do
       fetched_rules = knowledge_base.fetch_rules_for_goal(goal)
 
       in_poland_and_shop = fetched_rules.first.left.map(&:predicate).map(&:name)
-      expect(in_poland_and_shop).to contain_exactly('InPoland', 'Sklep')
+      expect(in_poland_and_shop).to contain_exactly('InPoland', 'Shop')
 
       common_and_shop = fetched_rules.last.left.map(&:predicate).map(&:name)
-      expect(common_and_shop).to contain_exactly('Common', 'Sklep')
+      expect(common_and_shop).to contain_exactly('Common', 'Shop')
     end
   end
 

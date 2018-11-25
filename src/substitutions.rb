@@ -13,6 +13,28 @@ class Substitutions
   end
 
   def unify!(x, y)
+    first_level_unification(x, y)
+    second_level_unification
+    self
+  end
+
+  def apply(atomic_form)
+    atomic_form.substitute_args(mapping)
+  end
+
+  def failed?
+    @failed
+  end
+
+  def dup
+    Substitutions.new(mapping.dup)
+  end
+
+  private
+
+  attr_accessor :mapping, :failed
+
+  def first_level_unification(x, y)
     return self if failed?
     return self if x == y
 
@@ -35,21 +57,15 @@ class Substitutions
     fail!
   end
 
-  def apply(atomic_form)
-    atomic_form.substitute_args(mapping)
+  def second_level_unification
+    mapping.each do |key, value|
+      if value.is_a?(AtomicForm)
+        mapping[key] = apply(value)
+      elsif value.is_a?(AndStatement)
+        mapping[key] = value.map { |conjunct| apply(conjunct) }
+      end
+    end
   end
-
-  def failed?
-    @failed
-  end
-
-  def dup
-    Substitutions.new(mapping.dup)
-  end
-
-  private
-
-  attr_accessor :mapping, :failed
 
   def fail!
     self.failed = true
@@ -64,10 +80,7 @@ class Substitutions
   def unify_variable(variable, x)
     return unify(mapping[variable], x) if mapping.key?(variable)
     return unify(variable, mapping[x]) if mapping.key?(x)
-    if x.is_a?(AtomicForm)
-      return fail! if x.uses_variable?(variable)
-      x = apply(x)
-    end
+    return fail! if x.is_a?(AtomicForm) and x.uses_variable?(variable)
 
     add(variable => x)
   end

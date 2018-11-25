@@ -1,3 +1,5 @@
+require_relative 'and_statement'
+
 class Clause
   include Dry::Equalizer(:left, :right)
 
