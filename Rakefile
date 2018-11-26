@@ -68,15 +68,15 @@ def create_package(target, os_type = :unix)
   sh "rm -rf #{package_dir}"
   sh "mkdir #{package_dir}"
   sh "mkdir -p #{package_dir}/lib/app"
-  sh "cp -r src #{package_dir}/lib/app/"
-  sh "cp -r config #{package_dir}/lib/app/"
-  sh "cp -r bin #{package_dir}/lib/app/"
+  sh "cp -r src config bin spec #{package_dir}/lib/app/"
   sh "mkdir #{package_dir}/lib/ruby"
   sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/lib/ruby"
   if os_type == :unix
     sh "cp packaging/wrapper.sh #{package_dir}/backward_chaining"
   else
-    sh "cp packaging/wrapper.bat #{package_dir}/backward_chaining.bat"
+    sh "cp packaging/wrapper_runner.bat #{package_dir}/backward_chaining.bat"
+    sh "cp packaging/wrapper_rspec.bat #{package_dir}/tests.bat"
+    sh "cp packaging/wrapper_console.bat #{package_dir}/console.bat"
   end
   sh "cp -pR packaging/vendor #{package_dir}/lib/"
   sh "cp Gemfile Gemfile.lock #{package_dir}/lib/vendor/"
