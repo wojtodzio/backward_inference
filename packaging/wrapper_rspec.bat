@@ -6,3 +6,4 @@ set BUNDLE_IGNORE_CONFIG=
 
 :: Run the actual app using the bundled Ruby interpreter, with Bundler activated.
 @"%~dp0\lib\ruby\bin\bundle.bat" exec rspec "--format=documentation"
+pause

@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require_relative '../spec/spec_helper'
+
+RSpec.configure { |c| c.profile_examples = false }
+RSpec::Core::Runner.run(['spec', '--format=documentation'])

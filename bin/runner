@@ -35,6 +35,7 @@ else
   puts 'Knows(Anna, x)'
   puts 'Female(x) AND StudiesOn(PW, x) => Knows(x, Jan)'
   puts 'Female(Jadwiga) AND StudiesOn(PW, Jadwiga)'
+  puts 'end'
 
   clauses = []
   while (input_line = get_input).downcase != 'end'

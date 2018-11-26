@@ -1,2 +1,4 @@
 spec/examples.txt
 *.DS_Store
+packaging/*.tar.gz
+*.zip
