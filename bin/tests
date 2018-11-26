@@ -2,5 +2,7 @@
 
 require_relative '../spec/spec_helper'
 
+path_to_specs = Pathname.new(__FILE__).join('../../spec').to_s
+
 RSpec.configure { |c| c.profile_examples = false }
-RSpec::Core::Runner.run(['spec', '--format=documentation'])
+RSpec::Core::Runner.run([path_to_specs, '--format=documentation'])

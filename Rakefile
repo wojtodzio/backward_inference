@@ -71,6 +71,7 @@ def create_package(target, os_type = :unix)
   sh "cp -r src config bin spec #{package_dir}/lib/app/"
   sh "mkdir #{package_dir}/lib/ruby"
   sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/lib/ruby"
+  sh "cp -r packaging/additional/* #{package_dir}"
   if os_type == :unix
     sh "cp packaging/wrapper.sh #{package_dir}/backward_chaining"
   else
