@@ -6,3 +6,8 @@ path_to_specs = Pathname.new(__FILE__).join('../../spec').to_s
 
 RSpec.configure { |c| c.profile_examples = false }
 RSpec::Core::Runner.run([path_to_specs, '--format=documentation'])
+
+if ARGV[0].chomp.strip.downcase == 'pause'
+  puts 'Press any key to exit...'
+  STDIN.gets
+end
