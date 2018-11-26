@@ -1,40 +1,56 @@
 #!/usr/bin/env ruby
 
 DEFAULT_ENV = :production
+NEWLINE = "\n"
 
 require_relative '../config/app'
 
+def read_lines_from_file(path)
+  File.read(path).split(NEWLINE).map(&:chomp).map(&:strip).reject(&:empty?)
+end
+
+def get_input
+  STDIN.gets.chomp.strip
+end
+
 if ARGV.count == 2
-  input = File.read(ARGV[0]).split("\n").map(&:chomp).map(&:strip).reject(&:empty?)
-  queries = File.read(ARGV[1]).split("\n").map(&:chomp).map(&:strip).reject(&:empty?)
+  input   = read_lines_from_file(ARGV[0])
+  queries = read_lines_from_file(ARGV[1])
 
   knowledge_base = KnowledgeBase.new(input)
 
-  result = ''
-  newline = "\n"
-  queries.each do |query|
-    result << "Answers for #{query}:"
-    result << newline
-    knowledge_base.ask(query).each do |answer|
-      result << answer.to_s
-      result << newline
+  File.open('output.txt', 'w') do |file|
+    queries.each do |query|
+      file.puts "Answers for #{query}:"
+
+      knowledge_base.ask(query).each do |answer|
+        file.puts answer
+      end
     end
-    result << newline
+  end
+else
+  puts 'Type clauses for knowledge base separating them by enter (=> for implication, AND for conjunction)'
+  puts 'Type "end" at the end'
+  puts 'E.g.:'
+  puts 'Knows(Anna, x)'
+  puts 'Female(x) AND StudiesOn(PW, x) => Knows(x, Jan)'
+  puts 'Female(Jadwiga) AND StudiesOn(PW, Jadwiga)'
+
+  clauses = []
+  while (input_line = get_input).downcase != 'end'
+    clauses << input_line if !input_line.empty?
   end
 
-  File.write('output.txt', result)
-else
-  puts "Type your query (=> for implication, AND for conjunction):"
-  query = gets
-  puts 'Type clauses for knowledge base separating them by enter'
-  puts 'Type "end" at the end'
-  queries = []
-  while (q = STDIN.gets.chomp).downcase != 'end'
-    queries << q
-  end
-  puts "Answer to #{query}"
-  puts ''
-  KnowledgeBase.new(queries).ask(query).each do |answer|
-    puts answer
+  knowledge_base = KnowledgeBase.new(clauses)
+
+  puts 'Type your queries'
+  puts 'E.g. Knows(x, Jan)'
+  puts 'You can exit by typing "exit"'
+  while (query = get_input).downcase != 'exit'
+    next if query.empty?
+    puts "Answers for #{query}:"
+    knowledge_base.ask(query).each do |answer|
+      puts answer
+    end
   end
 end
