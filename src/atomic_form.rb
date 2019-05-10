@@ -1,5 +1,4 @@
 require_relative 'predicate'
-require_relative 'constant'
 
 class AtomicForm
   include Dry::Equalizer(:predicate, :args)

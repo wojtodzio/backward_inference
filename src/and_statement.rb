@@ -1,6 +1,4 @@
 class AndStatement < Array
-  include Enumerable
-
   def self.from(args)
     new(args).flatten if args
   end

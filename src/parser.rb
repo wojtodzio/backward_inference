@@ -30,13 +30,15 @@ class Parser
   end
 
   def parse
-    return if string.empty?
+    return if string.nil? || string.empty?
     return build_implication if string.include?('=>')
     return build_and if string.include?('AND')
     return get_variable(string) if starts_with_lowercase_letter?
     return build_atomic_form if string.include?('(')
     return build_constant
   end
+
+  protected
 
   def get_variable(string_variable)
     if parent
@@ -87,6 +89,6 @@ class Parser
   end
 
   def normalize_string(string)
-    string.strip.squeeze(' ').gsub(/,\s+/, ',')
+    string.strip.squeeze(' ')
   end
 end
